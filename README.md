@@ -61,10 +61,11 @@ SET
         THEN CURRENT_DATE - target_date
         ELSE 0
     END;
-
+```
 ## 📊 Key Analysis
 Project-Level Summary
 - Total vs overdue tasks/forms per project
+```sql
 SELECT
     t.project,
     COUNT(DISTINCT t.task_id) AS total_tasks,
@@ -75,10 +76,10 @@ FROM tasks_clean t
 LEFT JOIN forms_clean f
   ON t.project = f.project
 GROUP BY t.project;
-
+```
 Task Group Analysis
 - Identify teams causing delays
-
+```sql
 SELECT
     task_group,
     COUNT(*) AS total_tasks,
@@ -87,9 +88,9 @@ SELECT
 FROM tasks_clean
 GROUP BY task_group
 ORDER BY overdue_pct DESC;
-
+```
 Priority & Root Cause Analysis
-
+```sql
 SELECT priority, COUNT(*) AS total_tasks,
        SUM(CASE WHEN overdue = TRUE THEN 1 ELSE 0 END) AS overdue_tasks
 FROM tasks_clean
@@ -103,10 +104,10 @@ FROM tasks_clean
 WHERE cause IS NOT NULL AND cause <> ''
 GROUP BY cause
 ORDER BY overdue_pct DESC;
-
+```
 Project Risk Score
 - Combines overdue tasks, high priority, and team complexity
-
+```sql
 CREATE TABLE project_risk AS
 SELECT
     project,
@@ -116,17 +117,17 @@ SELECT
 FROM tasks_clean
 GROUP BY project
 ORDER BY risk_score DESC;
-
+```
 Time-Based Trends
 - Monthly analysis of overdue tasks
-
+```sql
 SELECT DATE_TRUNC('month', created_date) AS month,
        COUNT(*) AS total_tasks,
        SUM(CASE WHEN overdue = TRUE THEN 1 ELSE 0 END) AS overdue_tasks
 FROM tasks_clean
 GROUP BY month
 ORDER BY month;
-
+```
 ##📈 Interactive Dashboard Features
 
 - KPI Cards: Total tasks/forms, overdue %, project risk rating
