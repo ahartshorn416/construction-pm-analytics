@@ -137,4 +137,4 @@ ORDER BY month;
 - Dynamic filters: project, task group, priority, date ranges
 
 ## 🌐 Tableau Public Embed
-[<iframe src="YOUR_TABLEAU_PUBLIC_EMBED_LINK" width="1000" height="800"></iframe>](https://public.tableau.com/app/profile/alison.hartshorn/viz/ConstructionProjectExecutiveOverview/ConstructionProjectExecutiveOverview#1)
+(https://public.tableau.com/app/profile/alison.hartshorn/viz/ConstructionProjectExecutiveOverview/ConstructionProjectExecutiveOverview#1)
