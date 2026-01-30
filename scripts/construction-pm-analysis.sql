@@ -126,30 +126,47 @@ LEFT JOIN forms_clean f
   ON t.project = f.project
 GROUP BY t.project;
 
+
 CREATE TABLE project_kpis AS
+WITH task_summary AS (
+    SELECT
+        project,
+        COUNT(DISTINCT task_id) AS total_tasks,
+        SUM(CASE WHEN overdue = TRUE THEN 1 ELSE 0 END) AS overdue_tasks
+    FROM tasks_clean
+    GROUP BY project
+),
+form_summary AS (
+    SELECT
+        project,
+        COUNT(DISTINCT form_id) AS total_forms,
+        SUM(CASE WHEN overdue = TRUE THEN 1 ELSE 0 END) AS overdue_forms
+    FROM forms_clean
+    GROUP BY project
+)
 SELECT
     t.project,
 
-    COUNT(DISTINCT t.task_id) AS total_tasks,
-    SUM(CASE WHEN t.overdue = TRUE THEN 1 ELSE 0 END) AS overdue_tasks,
-
+    -- Tasks
+    COALESCE(t.total_tasks, 0) AS total_tasks,
+    COALESCE(t.overdue_tasks, 0) AS overdue_tasks,
     ROUND(
-      100.0 * SUM(CASE WHEN t.overdue = TRUE THEN 1 ELSE 0 END)
-      / COUNT(DISTINCT t.task_id), 2
+        100.0 * COALESCE(t.overdue_tasks, 0) / NULLIF(t.total_tasks, 0),
+        2
     ) AS overdue_task_pct,
 
-    COUNT(DISTINCT f.form_id) AS total_forms,
-    SUM(CASE WHEN f.overdue = TRUE THEN 1 ELSE 0 END) AS overdue_forms,
-
+    -- Forms
+    COALESCE(f.total_forms, 0) AS total_forms,
+    COALESCE(f.overdue_forms, 0) AS overdue_forms,
     ROUND(
-      100.0 * SUM(CASE WHEN f.overdue = TRUE THEN 1 ELSE 0 END)
-      / NULLIF(COUNT(DISTINCT f.form_id),0), 2
+        100.0 * COALESCE(f.overdue_forms, 0) / NULLIF(f.total_forms, 0),
+        2
     ) AS overdue_form_pct
 
-FROM tasks_clean t
-LEFT JOIN forms_clean f
-  ON t.project = f.project
-GROUP BY t.project;
+FROM task_summary t
+LEFT JOIN form_summary f ON t.project = f.project
+ORDER BY t.project;
+
 
 SELECT
     task_group,
@@ -170,18 +187,23 @@ FROM tasks_clean
 GROUP BY priority
 ORDER BY overdue_tasks DESC;
 
+
 CREATE TABLE project_risk AS
 SELECT
     project,
-
-    (SUM(CASE WHEN overdue = TRUE THEN 1 ELSE 0 END) * 1.0
-     + SUM(CASE WHEN priority = 'High' THEN 0.5 ELSE 0 END)
-     + COUNT(DISTINCT task_group) * 0.2
+    COALESCE(
+      SUM(CASE WHEN overdue = TRUE THEN 1 ELSE 0 END), 0
+    ) * 1.0
+  + COALESCE(
+      SUM(CASE WHEN priority = 'High' THEN 0.5 ELSE 0 END), 0
+    )
+  + COALESCE(
+      COUNT(DISTINCT task_group) * 0.2, 0
     ) AS risk_score
-
 FROM tasks_clean
 GROUP BY project
 ORDER BY risk_score DESC;
+
 
 SELECT
     DATE_TRUNC('month', created_date) AS month,
