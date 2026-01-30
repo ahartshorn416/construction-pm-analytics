@@ -128,7 +128,7 @@ FROM tasks_clean
 GROUP BY month
 ORDER BY month;
 ```
-##📈 Interactive Dashboard Features
+## 📈 Interactive Dashboard Features
 
 - KPI Cards: Total tasks/forms, overdue %, project risk rating
 - Delay Trends Over Time
@@ -136,5 +136,5 @@ ORDER BY month;
 - Overdue Tasks by Task Group bar chart
 - Dynamic filters: project, task group, priority, date ranges
 
-🌐 Tableau Public Embed
+## 🌐 Tableau Public Embed
 [<iframe src="YOUR_TABLEAU_PUBLIC_EMBED_LINK" width="1000" height="800"></iframe>](https://public.tableau.com/app/profile/alison.hartshorn/viz/ConstructionProjectExecutiveOverview/ConstructionProjectExecutiveOverview#1)
